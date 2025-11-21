@@ -72,3 +72,24 @@ city_models = homicides |>
 city_models |> select(city_state, estimate, conf.low, conf.high) |> head()
 
 ```
+
+
+```{r}
+# Plot ORs and CIs by city
+
+
+ggplot(city_models, aes(x = city_state, y = estimate)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.9) +
+  geom_point(size = 2) +
+  coord_flip() +
+  labs(
+    x = "City",
+    y = "Adjusted Odds Ratio (Male vs Female)",
+    title = "Adjusted Odds Ratios for Solving Homicides by City",
+    subtitle = "Male vs Female victims, adjusted for age and race"
+  )
+```
+Each point represents the adjusted odds ratio comparing the likelihood of solving homicides involving male victims to those involving female victims, while age and race remain constant. The horizontal bars represent 95% confidence intervals, and cities are ordered by their estimated ORs for easier comparison. An OR above 1 indicates higher odds of solving homicides of male victims, while an OR below 1 indicates lower odds.
+
+
