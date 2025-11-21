@@ -1,0 +1,48 @@
+---
+title: "hw6_vy2196"
+
+output: github_document
+
+---
+
+```{r}
+library(tidyverse)
+library(broom)
+library(purrr)
+library(forcats)
+```
+### Problem 1
+```{r}
+homicides = read.csv("homicide_data.csv") |>
+  janitor::clean_names() |>
+  mutate(
+    city_state = str_c(city, ", ", state),
+    solved = if_else(disposition == "Closed by arrest", 1, 0),
+    victim_age = as.numeric(victim_age)) |>
+  # drop specific cities
+  filter(
+    !city_state %in% c("Dallas, TX", "Phoenix, AZ", 
+                       "Kansas City, MO", "Tulsa, AL"),
+    victim_race %in% c("White", "Black"))
+```
+```{r}
+baltimore_dat = homicides |>
+  filter(city_state == "Baltimore, MD")
+
+fit_baltimore = glm(
+  solved ~ victim_age + victim_sex + victim_race,
+  data = baltimore_dat,
+  family = binomial())
+
+# adjusted OR and CI for male vs female (Baltimore)
+baltimore_OR = tidy(
+  fit_baltimore,
+  exponentiate = TRUE,
+  conf.int = TRUE) |>
+  filter(term == "victim_sexMale") |>
+  select(term, estimate, conf.low, conf.high)
+
+baltimore_OR
+```
+In Baltimore, MD, the adjusted odds ratio for homicide resolution for male victims compared with female victims is 0.43 (95% CI: 0.32–0.56), indicating that, holding age and race constant, homicides involving male victims have substantially lower odds of being solved. The confidence interval excludes 1, suggesting this association is statistically significant.
+
