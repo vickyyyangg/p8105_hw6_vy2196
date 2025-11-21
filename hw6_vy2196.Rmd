@@ -171,3 +171,18 @@ The linear regression model predicting tmax from tmin and prcp is highly stable:
 
 
 
+### Problem 3
+```{r}
+birthweight = read.csv("birthweight.csv") 
+
+bw = birthweight |>
+    mutate(
+    # regression model treats them as categorical rather than numeric
+    babysex = factor(babysex, labels = c("male", "female")),
+    frace   = factor(frace),
+    mrace   = factor(mrace),
+    malform = factor(malform),)
+
+sum(is.na(birthweight))
+```
+
