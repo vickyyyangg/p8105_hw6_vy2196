@@ -154,3 +154,20 @@ The bootstrap distribution of r-square is tightly concentrated around ~0.942 wit
 
 The bootstrap distribution of the ratio beta1/beta2 is wide and left skewed, ranging approximately from –400 to –100. This reflects substantial uncertainty in comparing the effect of minimum temperature to precipitation on maximum temperature. Because the precipitation coefficient is small and unstable across samples, the ratio is highly variable.
 
+```{r}
+#CI
+ci_results =
+  boot_results |>
+  summarise(
+    r2_lower   = quantile(r_sq, 0.025),
+    r2_upper   = quantile(r_sq, 0.975),
+    ratio_lower = quantile(beta_ratio, 0.025),
+    ratio_upper = quantile(beta_ratio, 0.975)
+  )
+
+ci_results
+```
+The linear regression model predicting tmax from tmin and prcp is highly stable: the 95% bootstrap confidence interval for r-sqaure is (0.934, 0.947), indicating that the model consistently explains more than 93% of the variability in maximum temperature. In contrast, the distribution of the ratio of coefficient estimates beta1/beta2 is wide, with a 95% CI of (–277, –126). This large spread reflects high uncertainty in the relative effect sizes, driven primarily by the small and noisy precipitation coefficient, which makes the ratio unstable across bootstrap samples.
+
+
+
