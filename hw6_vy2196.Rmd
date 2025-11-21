@@ -186,3 +186,34 @@ bw = birthweight |>
 sum(is.na(birthweight))
 ```
 
+```{r}
+# fit the model
+mod_my = lm(
+  bwt ~ gaweeks + ppbmi + wtgain + smoken + momage + parity + mrace + babysex,
+  data = bw)
+
+summary(mod_my)
+tidy(mod_my)
+```
+I included all possible values that focus on maternal characteristics and gestational age. Then `lm` fits a linear regression with birth weight as outcome. Then `summary` and `tidy` give estimates, standard errors, p-values, etc.
+
+```{r}
+# Residuals vs fitted plot
+
+bw_my = bw |>
+  add_predictions(mod_my) |>
+  add_residuals(mod_my)
+
+ggplot(bw_my, aes(x = pred, y = resid)) +
+  geom_point(alpha = 0.4) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(
+    x = "Fitted values (predicted birthweight)",
+    y = "Residuals",
+    title = "Residuals vs fitted values for proposed birthweight model"
+  )
+```
+
+The residuals vs fitted plot shows that the residuals are centered around zero with no strong pattern, indicating that the linearity assumption is reasonably met. There is no obvious funnel shape, suggesting that heteroskedasticity is limited, although the residual spread does increase slightly at higher fitted values. Overall, this diagnostic plot indicates that the proposed model fits the data adequately, with no major violations of regression assumptions.
+
+
