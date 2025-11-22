@@ -216,4 +216,65 @@ ggplot(bw_my, aes(x = pred, y = resid)) +
 
 The residuals vs fitted plot shows that the residuals are centered around zero with no strong pattern, indicating that the linearity assumption is reasonably met. There is no obvious funnel shape, suggesting that heteroskedasticity is limited, although the residual spread does increase slightly at higher fitted values. Overall, this diagnostic plot indicates that the proposed model fits the data adequately, with no major violations of regression assumptions.
 
+```{r}
+# length at birth and gestational age as predictors (main effects only)
+mod_simple = function(df) {
+  lm(bwt ~ blength + gaweeks, data = df)}
+
+# head circumference, length, sex, and all interactions 
+mod_interact = function(df) {
+  lm(bwt ~ bhead * blength * babysex, data = df)}
+
+# my proposed model into a function
+mod_my_fun = function(df) {
+  lm(
+    bwt ~ gaweeks + ppbmi + wtgain + smoken +
+      momage + parity + mrace + babysex,
+    data = df
+  )}
+```
+
+
+```{r}
+# cross validation
+
+set.seed(1)
+
+cv_df = crossv_mc(
+  bw,
+  n    = 100,   # number of random splits
+  test = 0.2    # proportion in training set
+)
+
+
+cv_results = cv_df |>
+  mutate(
+    # fit models on the training data
+    mod_my       = map(train, mod_my_fun),
+    mod_simple   = map(train, mod_simple),
+    mod_interact = map(train, mod_interact),
+
+    # compute RMSE on the corresponding test data
+    rmse_my       = map2_dbl(mod_my,       test, ~ rmse(.x, .y)),
+    rmse_simple   = map2_dbl(mod_simple,   test, ~ rmse(.x, .y)),
+    rmse_interact = map2_dbl(mod_interact, test, ~ rmse(.x, .y))
+  )
+
+
+rmse_summary <- cv_results |>
+  select(starts_with("rmse_")) |>
+  pivot_longer(everything(),
+               names_to = "model",
+               values_to = "rmse") |>
+  group_by(model) |>
+  summarise(
+    mean_rmse = mean(rmse),
+    sd_rmse   = sd(rmse),
+    .groups   = "drop"
+  )
+
+rmse_summary
+
+```
+Based on the mean RMSE of the three predicitve models, we can conclude that the interaction model is the best predictive model due to its low RMSE. Followed by the simple model, which has ~332 RMSE. The proposed model has the poorest performance due to its high RMSE. 
 
